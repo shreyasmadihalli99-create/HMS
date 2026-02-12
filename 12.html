@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>HUKKERI MEGA STORE</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body{font-family:Arial;background:#f2f2f2;margin:0}
+
+/* INTRO */
+#introScreen{
+position:fixed;
+inset:0;
+background:#0b1a2c;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+z-index:9999;
+}
+
+#introHeader{position:absolute;top:20px;left:20px;}
+#introLogo{width:70px;}
+
+#dreamText{
+font-size:60px;
+font-weight:bold;
+letter-spacing:6px;
+color:#fff;
+text-shadow:0 0 10px #00f7ff,0 0 40px #00f7ff;
+}
+
+header{background:#2ecc71;color:#fff;padding:15px;text-align:center}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:10px}
+.card{background:#fff;border-radius:10px;padding:10px;text-align:center;cursor:pointer;box-shadow:0 2px 5px rgba(0,0,0,.1)}
+.card img{width:100%;height:90px;object-fit:contain}
+button{background:#27ae60;color:#fff;border:none;padding:8px 12px;border-radius:6px;margin:3px;cursor:pointer}
+.hidden{display:none}
+pre{white-space:pre-wrap}
+.cart{background:#fff;margin:10px;padding:10px;border-radius:10px}
+input,textarea{width:100%;padding:8px;margin:5px 0}
+.selectedPack{background:#e67e22 !important;}
+</style>
+</head>
+
+<body>
+
+<!-- INTRO -->
+<div id="introScreen">
+<div id="introHeader">
+<img src="images/logo.png.jpg" id="introLogo">
+</div>
+<div id="dreamText"></div>
+</div>
+
+<header>
+<h2>HUKKERI MEGA STORE</h2>
+<p>Delivery only in selected villages</p>
+</header>
+
+<!-- HOME -->
+<div id="home" class="grid hidden">
+
+<div class="card" onclick="openBrands('rice')"><img src="images/rice.png"><h4>Rice 🌾</h4></div>
+<div class="card" onclick="openBrands('spices')"><img src="images/spices.png"><h4>Spices 🌶️</h4></div>
+<div class="card" onclick="openBrands('atta')"><img src="images/atta.png"><h4>Atta 🌾</h4></div>
+<div class="card" onclick="openBrands('oils')"><img src="images/oil.png"><h4>Cooking Oil 🛢️</h4></div>
+<div class="card" onclick="openBrands('ghee')"><img src="images/ghee.png"><h4>Ghee 🧈</h4></div>
+<div class="card" onclick="openBrands('cleaning')"><img src="images/cleaning.png"><h4>Cleaning 🧹</h4></div>
+<div class="card" onclick="openBrands('personal')"><img src="images/personal.png"><h4>Personal Care 🧴</h4></div>
+<div class="card" onclick="openBrands('snacks')"><img src="images/snackes.png"><h4>Snacks 🍪</h4></div>
+<div class="card" onclick="openBrands('drinks')"><img src="images/drinkes.png"><h4>Drinks 🥤</h4></div>
+<div class="card" onclick="openBrands('bakery')"><img src="images/backery.png"><h4>Bakery 🍞</h4></div>
+<div class="card" onclick="openBrands('baby')"><img src="images/baby.png"><h4>Baby 👶</h4></div>
+<div class="card" onclick="openBrands('pets')"><img src="images/pet.png"><h4>Pet Food 🐶</h4></div>
+<div class="card" onclick="openBrands('stationery')"><img src="images/stationery.png"><h4>Stationery ✏️</h4></div>
+<div class="card" onclick="openBrands('party')"><img src="images/party.png"><h4>Party 🎉</h4></div>
+<div class="card" onclick="openBrands('pulses')"><img src="images/pulses.png"><h4>Pulses 🌰</h4></div>
+<div class="card" onclick="openBrands('nuts')"><img src="images/nuts.png"><h4>Nuts 🥜</h4></div>
+<div class="card" onclick="openBrands('basic')"><img src="images/basic.png"><h4>Basic Items</h4></div>
+
+</div>
+
+<!-- BRAND PAGE -->
+<div id="brandPage" class="hidden">
+<h3 id="brandTitle"></h3>
+<div id="brandList" class="grid"></div>
+<button onclick="goHome()">⬅ Back</button>
+</div>
+
+<!-- PRODUCT PAGE -->
+<div id="productPage" class="hidden">
+<h3 id="productTitle"></h3>
+<h4>Select Pack</h4>
+<div id="packs"></div>
+
+<h4>Quantity</h4>
+<button onclick="changeQty(-1)">➖</button>
+<b id="qty">1</b>
+<button onclick="changeQty(1)">➕</button>
+
+<br><br>
+<button onclick="addToCart()">Add to Cart</button>
+<br><br>
+<button onclick="goBack()">⬅ Back</button>
+</div>
+
+<!-- CART -->
+<div class="cart">
+<h3>🛒 Cart</h3>
+<pre id="cartView">No items</pre>
+</div>
+
+<div class="cart">
+<h3>🐷 Piggy Bank</h3>
+Coins: <b id="coinView">0</b>
+</div>
+
+<div class="cart">
+<h3>📦 Customer Details</h3>
+<input type="text" id="custName" placeholder="Enter Your Name">
+<input type="tel" id="custMobile" placeholder="Enter Mobile Number">
+<textarea id="custAddress" placeholder="Enter Full Address"></textarea>
+<button onclick="placeOrder()">📦 Place Order (WhatsApp)</button>
+</div>
+
+<script>
+
+/* AREA RESTRICTED */
+const allowedVillages=["Hukkeri","Gokak","Sankeshwar","Nesargi"];
+
+/* STORE DATA */
+const STORE={
+rice:{packs:[5,10,25],brands:[
+{name:"RL Rice",img:"images/rl-rice.png"},
+{name:"555 Rice",img:"images/555-rice.png"},
+{name:"Daawat Rice",img:"images/dawat.png"}]},
+spices:{packs:[0.1,0.25,0.5,1],brands:[
+{name:"Chilli Powder",img:"images/chille.png"},
+{name:"Turmeric Powder",img:"images/turmaric.png"},
+{name:"Coriander Powder",img:"images/coriander.png"},
+{name:"Garam Masala",img:"images/garam masala.png"}]},
+atta:{packs:[1,5,10],brands:[
+{name:"Aashirvaad Atta",img:"images/atta.png"},
+{name:"Local Atta",img:"images/local_atta.png"}]},
+oils:{packs:[0.5,1,5],brands:[
+{name:"Sunflower Oil",img:"images/sunflower oil.png"},
+{name:"Groundnut Oil",img:"images/groundnut oil.png"}]},
+ghee:{packs:[0.25,0.5,1],brands:[
+{name:"Cow Ghee",img:"images/cow_ghee.png"},
+{name:"Buffalo Ghee",img:"images/buffalo_ghee.png"}]},
+cleaning:{packs:[1],brands:[
+{name:"Mop",img:"images/mop.png"},
+{name:"Sweeper",img:"images/sweeper.png"},
+{name:"Dish Wash",img:"images/dish wash.png"},
+{name:"Floor Cleaner",img:"images/flor cleaner.png"},
+{name:"Toilet Cleaner",img:"images/toilat cleaner.png"},
+{name:"Phenyl",img:"images/penyl.png"},
+{name:"Detergent Powder",img:"images/D powder.png"},
+{name:"Detergent Bar",img:"images/detergent_bar.png"}]},
+personal:{packs:[0.1,0.2,0.5,1],brands:[
+{name:"Soap",img:"images/soap.png"},
+{name:"Shampoo",img:"images/shampoo.png"},
+{name:"Tooth Paste",img:"images/toothpaste.png"},
+{name:"Face Wash",img:"images/face wash.png"},
+{name:"Hair Oil",img:"images/hair_oil.png"},
+{name:"Hand Wash",img:"images/handwash.png"},
+{name:"Sanitary Pads",img:"images/sanitary_pads.png"}]},
+snacks:{packs:[1],brands:[
+{name:"Biscuit",img:"images/biscuit.png"},
+{name:"Chips",img:"images/chips.png"},
+{name:"Maggi",img:"images/maggi.png"},
+{name:"Chocolate",img:"images/chocolate.png"},
+{name:"Namkeen",img:"images/namkeen.png"}]},
+drinks:{packs:[0.25,0.5,1],brands:[
+{name:"Water Bottle",img:"images/water.png"},
+{name:"Cold Drink",img:"images/cold_drink.png"},
+{name:"Juice",img:"images/juice.png"}]},
+bakery:{packs:[1],brands:[
+{name:"Bread",img:"images/bread.png"},
+{name:"Rusk",img:"images/rusk.png"}]},
+baby:{packs:[1],brands:[
+{name:"Baby Diaper",img:"images/baby_diaper.png"},
+{name:"Baby Soap",img:"images/baby_soap.png"}]},
+pets:{packs:[1],brands:[
+{name:"Dog Food",img:"images/dog_food.png"},
+{name:"Cat Food",img:"images/cat_food.png"}]},
+stationery:{packs:[1],brands:[
+{name:"Notebook",img:"images/notebook.png"},
+{name:"Pen",img:"images/pen.png"},
+{name:"Pencil",img:"images/pencil.png"}]},
+party:{packs:[1],brands:[
+{name:"Balloons",img:"images/balloons.png"},
+{name:"Decoration Items",img:"images/decoration.png"}]},
+pulses:{packs:[0.5,1,5],brands:[
+{name:"Chana Dal",img:"images/chana_dal.png"},
+{name:"Masoor Dal",img:"images/masoor_dal.png"},
+{name:"Toor Dal",img:"images/toor_dal.png"},
+{name:"Urad Dal",img:"images/urad_dal.png"},
+{name:"Moong Dal",img:"images/moong_dal.png"}]},
+nuts:{packs:[0.25,0.5,1,2],brands:[
+{name:"Almonds",img:"images/almonds.png"},
+{name:"Cashew",img:"images/cashew.png"},
+{name:"Pistachio",img:"images/pistachio.png"},
+{name:"Peanut",img:"images/peanut.png"}]},
+basic:{packs:[0.5,1,2],brands:[
+{name:"Sugar",img:"images/sugar.png"},
+{name:"Jaggery",img:"images/jaggery.png"},
+{name:"Tata Salt",img:"images/tata_salt.png"},
+{name:"Tea Powder",img:"images/tea.png"},
+{name:"Coffee",img:"images/coffee.png"},
+{name:"Horlicks",img:"images/horlicks.png"},
+{name:"Boost",img:"images/boost.png"},
+{name:"Bournvita",img:"images/bournvita.png"},
+{name:"Complan",img:"images/complan.png"},
+{name:"Badam Powder",img:"images/badam.png"}]}
+};
+
+let cart={},currentType="",currentBrand="",currentPack=0,count=1;
+let piggyCoins=0,dailyTotal=0;
+
+window.onload=function(){
+dreamText.innerHTML="DREAM IT";
+setTimeout(()=>{introScreen.style.display="none";home.classList.remove("hidden");},1500);
+};
+
+function openBrands(t){
+home.classList.add("hidden");
+brandPage.classList.remove("hidden");
+currentType=t;
+brandTitle.innerText=t.toUpperCase();
+brandList.innerHTML="";
+STORE[t].brands.forEach(b=>{
+brandList.innerHTML+=`<div class="card" onclick="openProduct('${b.name}')">
+<img src="${b.img}">
+<h4>${b.name}</h4></div>`;
+});
+}
+
+function openProduct(b){
+brandPage.classList.add("hidden");
+productPage.classList.remove("hidden");
+currentBrand=b;
+productTitle.innerText=b;
+count=1;
+qty.innerText=count;
+renderPacks();
+}
+
+function renderPacks(){
+packs.innerHTML="";
+STORE[currentType].packs.forEach(p=>{
+packs.innerHTML+=`<button onclick="selectPack(this,${p})">${p<1?p*1000+' g':p+' kg'}</button>`;
+});
+}
+
+function selectPack(btn,p){
+currentPack=p;
+document.querySelectorAll("#packs button").forEach(b=>b.classList.remove("selectedPack"));
+btn.classList.add("selectedPack");
+}
+
+function changeQty(v){
+count=Math.max(1,count+v);
+qty.innerText=count;
+}
+
+function addToCart(){
+if(!currentPack){alert("Select Pack");return;}
+let total=100*count;
+dailyTotal+=total;
+piggyCoins+=Math.floor(total*0.02);
+coinView.innerText=piggyCoins;
+
+let item=currentBrand+" ("+(currentPack<1?currentPack*1000+' g':currentPack+' kg')+")";
+cart[item]=(cart[item]||0)+count;
+updateCart();
+}
+
+function updateCart(){
+let items=Object.entries(cart).map(([k,v])=>`${k} x ${v}`).join("\n");
+cartView.innerText=items+"\n\nTotal: ₹"+dailyTotal;
+}
+
+function goBack(){productPage.classList.add("hidden");brandPage.classList.remove("hidden");}
+function goHome(){brandPage.classList.add("hidden");home.classList.remove("hidden");}
+
+function placeOrder(){
+let name=custName.value.trim();
+let mobile=custMobile.value.trim();
+let address=custAddress.value.trim();
+
+if(Object.keys(cart).length===0){alert("Cart empty");return;}
+if(!name||!mobile||!address){alert("Fill all details");return;}
+
+let allowed=allowedVillages.some(v=>address.toLowerCase().includes(v.toLowerCase()));
+if(!allowed){alert("Delivery only in: "+allowedVillages.join(", "));return;}
+
+let text="🛒 HUKKERI MEGA STORE Order\n\n";
+text+="👤 "+name+"\n📱 "+mobile+"\n🏠 "+address+"\n\n";
+Object.entries(cart).forEach(([k,v])=>{text+=k+" x "+v+"\n";});
+text+="\nTotal: ₹"+dailyTotal;
+text+="\nCoins: "+piggyCoins;
+
+window.open("https://wa.me/917899196669?text="+encodeURIComponent(text),"_blank");
+}
+
+</script>
+</body>
+</html>
